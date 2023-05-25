@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 
 namespace FirebirdNetConverter.Application;
 
@@ -29,61 +29,76 @@ public class Program
             {
                 while (line != null)
                 {
-                    lineBuilder.Clear();
-
-                    var splitted = line.Trim().Split(' ');
-
-                    var columnName = splitted[2];
-                    var sqlType = splitted[3].ToUpper();
-
-                    lineBuilder.Append("public ");
-                    if (sqlType.Contains("VARCHAR") 
-                        || sqlType.Contains("CHAR") 
-                        || sqlType.Contains("CHARACTER"))
+                    try
                     {
-                        lineBuilder.Append("string?");
-                    }
-                    else if (sqlType.Contains("INTEGER"))
-                    {
-                        lineBuilder.Append("int?");
-                    }
-                    else if (sqlType.Contains("SMALLINT"))
-                    {
-                        lineBuilder.Append("short?");
-                    }
-                    else if (sqlType.Contains("TIMESTAMP") 
-                             || sqlType.Contains("DATE"))
-                    {
-                        lineBuilder.Append("DateTime?");
-                    }
-                    else if (sqlType.Contains("BOOLEAN"))
-                    {
-                        lineBuilder.Append("bool?");
-                    }
-                    else if (sqlType.Contains("NUMERIC"))
-                    {
-                        lineBuilder.Append("decimal?");
-                    }
+                        lineBuilder.Clear();
 
-                    lineBuilder.Append($" {columnName}");
-                    lineBuilder.Append(" { get; set; }");
+                        var splitted = line.Trim().Replace(" TYPE OF", "").Split(' ');
 
-                    streamWriter.WriteLine($"[Column({columnName})]");
-                    streamWriter.WriteLine(lineBuilder.ToString());
-                    streamWriter.WriteLine();
+                        var columnName = splitted[0];
+                        var sqlType = splitted[1].ToUpper();
 
-                    line = stream.ReadLine();
+                        lineBuilder.Append("public ");
+                        if (sqlType.Contains("VARCHAR")
+                            || sqlType.Contains("CHAR")
+                            || sqlType.Contains("CHARACTER")
+                            || sqlType.Contains("T_STRING"))
+                        {
+                            lineBuilder.Append("string?");
+                        }
+                        else if (sqlType.Contains("INTEGER"))
+                        {
+                            lineBuilder.Append("int?");
+                        }
+                        else if (sqlType.Contains("SMALLINT"))
+                        {
+                            lineBuilder.Append("short?");
+                        }
+                        else if (sqlType.Contains("T_ID"))
+                        {
+                            lineBuilder.Append("long?");
+                        }
+                        else if (sqlType.Contains("TIMESTAMP")
+                                 || sqlType.Contains("DATE")
+                                 || sqlType.Contains("TIME"))
+                        {
+                            lineBuilder.Append("DateTime?");
+                        }
+                        else if (sqlType.Contains("BOOLEAN"))
+                        {
+                            lineBuilder.Append("bool?");
+                        }
+                        else if (sqlType.Contains("NUMERIC"))
+                        {
+                            lineBuilder.Append("decimal?");
+                        }
+
+                        lineBuilder.Append($" {columnName}");
+                        lineBuilder.Append(" { get; set; }");
+
+                        streamWriter.WriteLine($"[Column({columnName})]");
+                        streamWriter.WriteLine(lineBuilder.ToString());
+                        streamWriter.WriteLine();
+
+                        line = stream.ReadLine();
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine($"Error in {line}");
+                        Console.WriteLine(ex.Message);
+                        line = stream.ReadLine();
+                    }
                 }
             }
         }
         catch (Exception ex)
         {
-            Console.Write(ex.Message);
+            Console.WriteLine(ex.Message);
             Console.ReadKey();
             return;
         }
 
-        Console.Write("Convert is successful.");
+        Console.WriteLine("Convertion complete.");
         Console.ReadKey();
     }
 }
