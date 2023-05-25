@@ -59,10 +59,13 @@ public class Program
                             lineBuilder.Append("long?");
                         }
                         else if (sqlType.Contains("TIMESTAMP")
-                                 || sqlType.Contains("DATE")
-                                 || sqlType.Contains("TIME"))
+                                 || sqlType.Contains("DATE"))
                         {
                             lineBuilder.Append("DateTime?");
+                        }
+                        else if(sqlType.Contains("TIME"))
+                        {
+                            lineBuilder.Append("TimeSpan?");
                         }
                         else if (sqlType.Contains("BOOLEAN"))
                         {
@@ -76,7 +79,7 @@ public class Program
                         lineBuilder.Append($" {columnName}");
                         lineBuilder.Append(" { get; set; }");
 
-                        streamWriter.WriteLine($"[Column({columnName})]");
+                        streamWriter.WriteLine($"[Column(\"{columnName}\")]");
                         streamWriter.WriteLine(lineBuilder.ToString());
                         streamWriter.WriteLine();
 
