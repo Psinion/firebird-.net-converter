@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace FirebirdNetConverter.Application;
 
@@ -33,7 +34,9 @@ public class Program
                     {
                         lineBuilder.Clear();
 
-                        var splitted = line.Trim().Replace(" TYPE OF", "").Split(' ');
+                        var processLine = line.Trim().Replace(" TYPE OF", "");
+
+                        var splitted = Regex.Split(processLine, @"\s{2,}");
 
                         var columnName = splitted[0];
                         var sqlType = splitted[1].ToUpper();
@@ -42,7 +45,9 @@ public class Program
                         if (sqlType.Contains("VARCHAR")
                             || sqlType.Contains("CHAR")
                             || sqlType.Contains("CHARACTER")
-                            || sqlType.Contains("T_STRING"))
+                            || sqlType.Contains("T_STRING")
+                            || sqlType.Contains("T_NAME")
+                            )
                         {
                             lineBuilder.Append("string?");
                         }
@@ -50,7 +55,8 @@ public class Program
                         {
                             lineBuilder.Append("int?");
                         }
-                        else if (sqlType.Contains("SMALLINT"))
+                        else if (sqlType.Contains("SMALLINT") ||
+                            sqlType.Contains("T_SHORT"))
                         {
                             lineBuilder.Append("short?");
                         }
@@ -71,7 +77,9 @@ public class Program
                         {
                             lineBuilder.Append("bool?");
                         }
-                        else if (sqlType.Contains("NUMERIC"))
+                        else if (sqlType.Contains("NUMERIC") ||
+                            sqlType.Contains("T_WEIGHT_TON")
+                            )
                         {
                             lineBuilder.Append("decimal?");
                         }
